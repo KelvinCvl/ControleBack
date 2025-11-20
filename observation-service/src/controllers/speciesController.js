@@ -4,7 +4,7 @@ class SpeciesController {
   async createSpecies(req, res) {
     try {
       const { name } = req.body;
-      const authorId = req.user.id;
+      const authorId = req.user.userId;
 
       if (!name) {
         return res.status(400).json({ error: 'name est obligatoire' });

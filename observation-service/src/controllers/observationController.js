@@ -4,7 +4,7 @@ class ObservationController {
   async createObservation(req, res) {
     try {
       const { speciesId, description, dangerLevel } = req.body;
-      const authorId = req.user.id;
+      const authorId = req.user.userId;
 
       if (!speciesId || !description || dangerLevel === undefined) {
         return res.status(400).json({ 
@@ -35,13 +35,19 @@ class ObservationController {
     }
   }
 
-  async validateObservation(req, res) {
+ async validateObservation(req, res) {
     try {
       const { id } = req.params;
-      const validatorId = req.user.id;
+      const validatorId = req.user.userId || req.user.id;
+      const validatorRole = req.user.role || 'USER';
 
-      const observation = await observationService.validateObservation(id, validatorId);
-      res.json(observation);
+      const observation = await observationService.validateObservation(
+        id,
+        validatorId,
+        validatorRole
+      );
+
+      res.json({ success: true, observation });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -50,10 +56,16 @@ class ObservationController {
   async rejectObservation(req, res) {
     try {
       const { id } = req.params;
-      const validatorId = req.user.id;
+      const validatorId = req.user.userId || req.user.id;
+      const validatorRole = req.user.role || 'USER';
 
-      const observation = await observationService.rejectObservation(id, validatorId);
-      res.json(observation);
+      const observation = await observationService.rejectObservation(
+        id,
+        validatorId,
+        validatorRole
+      );
+
+      res.json({ success: true, observation });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

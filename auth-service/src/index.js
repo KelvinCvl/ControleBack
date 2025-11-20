@@ -4,12 +4,14 @@ dotenv.config();
 import express from 'express';
 import 'express-async-errors';
 import authRoutes from './routes/authRoutes.js';
+import webhookRoutes from './routes/webhookRoutes.js';
 import { swaggerDocs } from './swagger.js';
 
 const app = express();
 app.use(express.json());
 
 app.use('/auth', authRoutes);
+app.use('/webhook', webhookRoutes);
 
 swaggerDocs(app);
 
