@@ -62,7 +62,7 @@ router.post('/', verifyJWT, (req, res) => observationController.createObservatio
  *       404:
  *         description: Observation non trouvée
  */
-router.post('/:id/validate', verifyJWT, verifyExpertOrAdmin, (req, res) => 
+router.post('/:id/validate', verifyJWT, (req, res) => 
   observationController.validateObservation(req, res)
 );
 
@@ -91,7 +91,7 @@ router.post('/:id/validate', verifyJWT, verifyExpertOrAdmin, (req, res) =>
  *       404:
  *         description: Observation non trouvée
  */
-router.post('/:id/reject', verifyJWT, verifyExpertOrAdmin, (req, res) => 
+router.post('/:id/reject', verifyJWT, (req, res) => 
   observationController.rejectObservation(req, res)
 );
 
