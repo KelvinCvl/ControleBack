@@ -1,3 +1,4 @@
+// Configuration de la base de données PostgreSQL
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -7,22 +8,34 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Observation {
-  id          Int      @id @default(autoincrement())
-  species     String
-  location    String
-  latitude    Float?
-  longitude   Float?
-  description String?
-  imageUrl    String?
-  userId      Int
-  status      Status   @default(PENDING)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// Fiche Créature
+
+model Species {
+  id        Int    @id @default(autoincrement()) 
+  name      String @unique                         
+  authorId  Int                                    
+  createdAt DateTime @default(now())              
 }
 
+// Fiche signalement)
+
+model Observation {
+  id          Int       @id @default(autoincrement())
+  speciesId   Int                                     
+  authorId    Int                                     
+  description String                                
+  dangerLevel Int                                    
+  status      Status    @default(PENDING)           
+  validatedBy Int?                                   
+  validatedAt DateTime?                              
+  createdAt   DateTime  @default(now())              
+}
+
+
+// Statuts 
+
 enum Status {
-  PENDING
-  APPROVED
-  REJECTED
+  PENDING     // En attente
+  VALIDATED   // Accepté
+  REJECTED    // Refusé
 }
