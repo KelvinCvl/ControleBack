@@ -72,7 +72,7 @@ class ObservationService {
       throw new Error('Impossible de valider sa propre observation');
     }
 
-    return await prisma.observation.update({
+    const validatedObservation = await prisma.observation.update({
       where: { id: parseInt(observationId) },
       data: {
         status: 'VALIDATED',
@@ -80,6 +80,12 @@ class ObservationService {
         validatedAt: new Date()
       }
     });
+
+    // Mettre à jour le score de rareté de l'espèce
+    const speciesService = require('./speciesService');
+    await speciesService.updateRarityScore(observation.speciesId);
+
+    return validatedObservation;
   }
 
   async rejectObservation(observationId, validatorId) {

@@ -36,9 +36,17 @@ router.post('/', verifyJWT, (req, res) => speciesController.createSpecies(req, r
  *   get:
  *     summary: Voir toutes les créatures
  *     tags: [Species]
+ *     parameters:
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [rarity]
+ *         description: Trier par rareté (les plus rares en premier)
+ *         example: "rarity"
  *     responses:
  *       200:
- *         description: Liste de toutes les créatures
+ *         description: Liste de toutes les créatures (avec indice de rareté)
  */
 router.get('/', (req, res) => speciesController.getAllSpecies(req, res));
 

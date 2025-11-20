@@ -191,3 +191,14 @@ C'est normal au début. Vérifie dans les logs du terminal s'il y a un message d
 
 - Dorian MILLION-BRODAZ 
 - Kelvin CHAUVEL
+
+
+## Niveau Intermédiaire
+
+### Indice de Rareté Automatique
+Chaque créature a maintenant un **indice de rareté** qui se calcule automatiquement:
+- **Formule:** `rarityScore = 1 + (observations validées / 5)`
+- Les créatures avec peu d'observations sont plus rares
+- Tu peux trier les créatures par rareté en utilisant: `GET /species?sort=rarity`
+
+**Exemple:** Si une créature a 10 observations validées, sa rareté sera: 1 + (10/5) = **3.0**

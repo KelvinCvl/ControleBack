@@ -19,7 +19,9 @@ class SpeciesController {
 
   async getAllSpecies(req, res) {
     try {
-      const species = await speciesService.getAllSpecies();
+      // Vérifier le paramètre de tri (sort=rarity pour trier par rareté)
+      const sortByRarity = req.query.sort === 'rarity';
+      const species = await speciesService.getAllSpecies(sortByRarity);
       res.json(species);
     } catch (error) {
       res.status(500).json({ error: error.message });

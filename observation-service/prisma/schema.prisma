@@ -14,6 +14,7 @@ model Species {
   id        Int    @id @default(autoincrement()) 
   name      String @unique                         
   authorId  Int                                    
+  rarityScore Float @default(1.0)                 
   createdAt DateTime @default(now())              
 }
 
