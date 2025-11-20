@@ -4,7 +4,7 @@ import {
   getUserById,
   getAllUsers,
   updateUserRole
-} from '../services/auth.service.js';
+} from '../services/authServices.js';
 
 export const register = async (req, res) => {
   try {
@@ -18,13 +18,14 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { identifier, password } = req.body;
-    const { user, token } = await loginUser(identifier, password);
+    const { email, password } = req.body; 
+    const { user, token } = await loginUser(email, password);
     res.json({ message: 'Connexion réussie', user, token });
   } catch (err) {
     res.status(401).json({ message: err.message });
   }
 };
+
 
 export const getMe = async (req, res) => {
   const user = await getUserById(req.user.userId);

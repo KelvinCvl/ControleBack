@@ -1,13 +1,17 @@
-require('dotenv').config();
-const express = require('express');
-const authRoutes = require('./src/routes/authRoutes');
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
+import 'express-async-errors';
+import authRoutes from './routes/authRoutes.js';
+import { swaggerDocs } from './swagger.js';
 
 const app = express();
 app.use(express.json());
 
-require('express-async-errors');
-
 app.use('/auth', authRoutes);
+
+swaggerDocs(app);
 
 app.use((err, req, res, next) => {
   console.error('Erreur:', err.message);
@@ -19,7 +23,8 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-  console.log(`\nAuth Service démarré`);
+  console.log(`\nAuth Service démarré sur le port ${PORT}`);
+  console.log(`Swagger: http://localhost:${PORT}/api-docs`);
 });
 
-module.exports = app; 
+export default app;
