@@ -60,11 +60,7 @@ class ObservationService {
       throw new Error('Impossible de valider sa propre observation');
     }
 
-<<<<<<< HEAD
-    const validatedObservation = await prisma.observation.update({
-=======
     const updated = await prisma.observation.update({
->>>>>>> feature/validationrejet
       where: { id: parseInt(observationId) },
       data: {
         status: 'VALIDATED',
@@ -73,13 +69,10 @@ class ObservationService {
       }
     });
 
-<<<<<<< HEAD
     // Mettre à jour le score de rareté de l'espèce
     const speciesService = require('./speciesService');
     await speciesService.updateRarityScore(observation.speciesId);
 
-    return validatedObservation;
-=======
     const giveBonusToValidator = validatorRole === 'EXPERT';
 
     axios.post(`${USER_SERVICE_URL}/webhook/observation-validated`, {
@@ -91,7 +84,6 @@ class ObservationService {
     }).catch(() => console.warn('Users-service injoignable – réputation non mise à jour'));
 
     return updated;
->>>>>>> feature/validationrejet
   }
 
   async rejectObservation(observationId, validatorId, validatorRole = 'USER') {
