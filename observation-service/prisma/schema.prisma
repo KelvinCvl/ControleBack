@@ -24,6 +24,7 @@ model Observation {
   speciesId   Int                                     
   authorId    Int                                     
   description String                                
+  dangerLevel Int                                    
   status      Status    @default(PENDING)           
   validatedBy Int?                                   
   validatedAt DateTime?                              
