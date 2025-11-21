@@ -1,0 +1,34 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Species {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  authorId    Int
+  createdAt   DateTime @default(now())
+  rarityScore Float    @default(0)
+}
+
+model Observation {
+  id          Int      @id @default(autoincrement())
+  speciesId   Int
+  authorId    Int
+  description String
+  dangerLevel Int
+  status      Status   @default(PENDING)
+  validatedBy Int?
+  validatedAt DateTime?
+  createdAt   DateTime @default(now())
+}
+
+enum Status {
+  PENDING
+  VALIDATED
+  REJECTED
+}
