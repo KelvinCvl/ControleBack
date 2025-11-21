@@ -148,24 +148,6 @@ Si tu vois ton observation! Elle est en attente de validation.
 - Le niveau de danger doit être entre 1 et 5
 - Tu dois être connecté pour signaler quelque chose
 
-
-## Architecture
-
-observation-service/
-├── src/
-│   ├── index.js              ← Le fichier principal (là où ça démarre)
-│   ├── config/
-│   │   └── swagger.js        ← La configuration de Swagger
-│   ├── controllers/          ← Là où on traite les demandes
-│   ├── services/             ← Là où c'est la "vraie logique"
-│   ├── routes/               ← Les chemins de l'appli (les URLs)
-│   └── middlewares/          ← Des vérifications (genre: "t'es connecté?")
-├── prisma/
-│   └── schema.prisma         ← Le plan de la base de données
-├── .env                      ← Les secrets (ne pas le mettre sur GitHub!)
-└── README.md                 ← Ce que tu lis maintenant
-
-
 ## Problèmes Courants
 
 ### "Le port 3002 est déjà utilisé"
@@ -175,7 +157,7 @@ Quelque chose d'autre utilise ce port. Essaie de fermer tous les terminals et de
 PostgreSQL n'est pas lancé. Ouvre ton application PostgreSQL ou relance le service.
 
 ### "JWT_SECRET invalide"
-Assure-toi que le JWT_SECRET dans les deux `.env` est **exactement pareil**.
+Assure-toi que le JWT_SECRET dans les deux `.env` est exactement pareil.
 
 ### "Je ne vois rien de bizarre"
 C'est normal au début. Vérifie dans les logs du terminal s'il y a un message d'erreur.
@@ -193,12 +175,197 @@ C'est normal au début. Vérifie dans les logs du terminal s'il y a un message d
 - Kelvin CHAUVEL
 
 
-## Niveau Intermédiaire
+## Fonctionnalités Implémentées - Niveau 13 (Intermédiaire)
 
-### Indice de Rareté Automatique
-Chaque créature a maintenant un **indice de rareté** qui se calcule automatiquement:
+### 1. Indice de Rareté Automatique
+Chaque créature a un indice de rareté qui évolue avec les observations:
 - **Formule:** `rarityScore = 1 + (observations validées / 5)`
-- Les créatures avec peu d'observations sont plus rares
-- Tu peux trier les créatures par rareté en utilisant: `GET /species?sort=rarity`
+- Les créatures très observées sont moins rares
+- **Tri par rareté:** `GET /species?sort=rarity`
 
-**Exemple:** Si une créature a 10 observations validées, sa rareté sera: 1 + (10/5) = **3.0**
+**Exemple:** 10 observations validées = rareté de 3.0
+
+### 2. Validation des Observations
+- Seuls les utilisateurs avec le rôle **EXPERT** ou **ADMIN** peuvent valider/rejeter
+- Impossible de valider sa propre observation
+- La rareté se met à jour automatiquement après validation
+
+### 3. Endpoints Disponibles
+- `POST /species` - Créer une créature (JWT requis)
+- `GET /species` - Lister toutes les créatures
+- `GET /species?sort=rarity` - Lister triées par rareté
+- `GET /species/:id` - Détails d'une créature
+- `POST /observations` - Soumettre une observation (JWT requis)
+- `POST /observations/:id/validate` - Valider une observation (EXPERT/ADMIN)
+- `POST /observations/:id/reject` - Rejeter une observation (EXPERT/ADMIN)
+- `GET /species/:id/observations` - Observations d'une créature
+
+## Règles de Sécurité
+
+**5 minutes obligatoires:** Impossible de soumettre 2 observations de la même espèce en < 5 minutes
+**Noms uniques:** Impossible de créer 2 espèces avec le même nom
+**Description obligatoire:** Toute observation doit avoir une description
+**Danger 1-5:** Le niveau de danger doit être entre 1 et 5
+**JWT obligatoire:** Toutes les opérations utilisateur nécessitent une authentification
+**Pas d'auto-validation:** Impossible de valider sa propre observation
+
+
+## Niveau 16 (Avancé) - Microservice de Taxonomie
+
+### 4. Taxonomy Service
+Un 3ème microservice qui analyse et classifie les espèces.
+
+**Port:** 3003
+**Documentation:** http://localhost:3003/api-docs
+
+#### Endpoints
+- `GET /taxonomy/stats` - Retourne les statistiques globales
+
+#### Statistiques Fournies
+- Nombre total d'espèces
+- Nombre total d'observations
+- Observations par espèce
+- Moyenne d'observations par espèce
+- Persistance des statistiques en base de données
+
+#### Architecture
+```
+taxonomy-service/
+├── src/
+│   ├── index.js
+│   ├── swagger.js
+│   ├── controllers/
+│   │   └── taxonomyController.js
+│   ├── services/
+│   │   ├── fetchdata.js       
+│   │   └── taxonomyService.js    
+│   └── routes/
+│       └── taxonomyRoutes.js
+├── prisma/
+│   └── schema.prisma
+└── package.json
+```
+
+#### Comment Tester
+
+1. Lance le taxonomy-service:
+```bash
+cd taxonomy-service
+npm install
+npm run dev
+```
+
+2. Va sur http://localhost:3003/api-docs
+
+3. Clique sur `GET /taxonomy/stats`
+
+4. Clique sur "Try it out" puis "Execute"
+
+Tu verras les statistiques de toutes les espèces et observations créées.
+
+## Installation Complète (Tous les Services)
+
+### Étape 1: Lancer auth-service
+```bash
+cd auth-service
+npm install
+npm run dev
+# Sur le port 3001
+```
+
+### Étape 2: Lancer observation-service
+```bash
+cd observation-service
+npm install
+npm run dev
+# Sur le port 3002
+```
+
+### Étape 3: Lancer taxonomy-service
+```bash
+cd taxonomy-service
+npm install
+npm run dev
+# Sur le port 3003
+```
+
+## Tous les Services
+
+| Service | Port | URL Swagger | Rôle |
+|---------|------|------------|------|
+| auth-service | 3001 | http://localhost:3001/api-docs | Authentification & gestion des rôles |
+| observation-service | 3002 | http://localhost:3002/api-docs | Gestion des espèces & observations |
+| taxonomy-service | 3003 | http://localhost:3003/api-docs | Statistiques et analyse |
+
+## Résumé des Niveaux Implémentés
+
+**Niveau 10 (Base)** - Tous les microservices fonctionnent
+**Niveau 13 (Intermédiaire)** - Système de rareté automatique
+**Niveau 16 (Avancé)** - Taxonomy service avec statistiques globales
+
+## Architecture Complète du Projet
+
+ControleBack/
+│
+├── auth-service/                       (Port 3001)
+│   ├── src/
+│   │   ├── index.js                   ← Point d'entrée Express
+│   │   ├── swagger.js                 ← Documentation API
+│   │   ├── controllers/
+│   │   │   └── authController.js      ← Gère les requêtes HTTP
+│   │   ├── services/
+│   │   │   ├── authServices.js        ← Logique d'authentification
+│   │   │   └── webhookServices.js     ← Communication avec autres services
+│   │   ├── routes/
+│   │   │   ├── authRoutes.js          ← Endpoints /auth
+│   │   │   └── webhookRoutes.js       ← Webhooks entrants
+│   │   ├── middlewares/
+│   │   │   └── authMiddleware.js      ← Vérification JWT
+│   │   └── controllers/
+│   │       └── webhookController.js   ← Traite les appels des autres services
+│   ├── prisma/
+│   │   ├── schema.prisma              ← Model User
+│   │   └── migrations/                ← Historique des changements DB
+│   ├── .env                           ← Variables d'environnement
+│   └── package.json
+│
+├── observation-service/               (Port 3002)
+│   ├── src/
+│   │   ├── index.js                   ← Point d'entrée Express
+│   │   ├── config/
+│   │   │   └── swagger.js             ← Documentation API
+│   │   ├── controllers/
+│   │   │   ├── speciesController.js   ← Gère les requêtes HTTP (espèces)
+│   │   │   └── observationController.js ← Gère les requêtes HTTP (observations)
+│   │   ├── services/
+│   │   │   ├── speciesService.js      ← Logique métier (espèces + rareté)
+│   │   │   └── observationService.js  ← Logique métier (observations + validation)
+│   │   ├── routes/
+│   │   │   ├── species.js             ← Endpoints /species
+│   │   │   └── observations.js        ← Endpoints /observations
+│   │   └── middlewares/
+│   │       └── auth.js                ← Vérification JWT & rôles
+│   ├── prisma/
+│   │   ├── schema.prisma              ← Models Species & Observation
+│   │   └── migrations/                ← Historique des changements DB
+│   ├── .env                           ← Variables d'environnement
+│   └── package.json
+│
+├── taxonomy-service/                  (Port 3003)
+│   ├── src/
+│   │   ├── index.js                   ← Point d'entrée Express
+│   │   ├── swagger.js                 ← Documentation API
+│   │   ├── controllers/
+│   │   │   └── taxonomyController.js  ← Gère les requêtes HTTP
+│   │   ├── services/
+│   │   │   ├── fetchdata.js           ← Récupère données du observation-service
+│   │   │   └── taxonomyService.js     ← Génère les statistiques
+│   │   └── routes/
+│   │       └── taxonomyRoutes.js      ← Endpoint /taxonomy/stats
+│   ├── prisma/
+│   │   ├── schema.prisma              ← Model Stats
+│   │   └── migrations/
+│   ├── .env                           ← Variables d'environnement
+│   └── package.json
+│
+└── README.md                          ← Ce fichier
