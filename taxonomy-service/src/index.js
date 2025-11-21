@@ -1,18 +1,17 @@
-const axios = require('axios');
-const OBSERVATION_SERVICE_URL = process.env.OBSERVATION_SERVICE_URL || 'http://localhost:3002';
+require("dotenv").config();
+const express = require("express");
+const taxonomyRoutes = require("./routes/taxonomyRoutes");
+const swaggerDocs = require("./swagger");
 
-async function fetchData() {
-  try {
+const app = express();
+app.use(express.json());
 
-    const speciesResp = await axios.get(`${OBSERVATION_SERVICE_URL}/species/`);
-    const species = speciesResp.data;
+app.use("/taxonomy", taxonomyRoutes);
 
-    const observationsResp = await axios.get(`${OBSERVATION_SERVICE_URL}/observations/get`);
-    const observations = observationsResp.data;
+swaggerDocs(app);
 
-    return { species, observations };
-  } catch (err) {
-    console.error("Erreur lors de la récupération des données :", err.message);
-    return { species: [], observations: [] };
-  }
-}
+const PORT = process.env.PORT || 3003;
+app.listen(PORT, () => {
+  console.log(`taxonomy-service running → http://localhost:${PORT}/api-docs`);
+});
+

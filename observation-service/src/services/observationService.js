@@ -6,6 +6,10 @@ const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:4000'
 
 class ObservationService {
 
+  async getAllObservations() {
+  return await prisma.observation.findMany();
+}
+
   async createObservation(speciesId, authorId, description, dangerLevel) {
     const species = await prisma.species.findUnique({
       where: { id: parseInt(speciesId) }
@@ -115,6 +119,62 @@ class ObservationService {
     }).catch(() => console.warn('Users-service injoignable – réputation non mise à jour'));
 
     return updated;
+  }
+
+  async softDeleteObservation(observationId, adminId) {
+    const obs = await prisma.observation.findUnique({ where: { id: observationId }});
+    if (!obs) throw new Error("Observation non trouvée");
+
+    const updated = await prisma.observation.update({
+      where: { id: observationId },
+      data: { deletedAt: new Date() }
+    });
+
+    await prisma.observationHistory.create({
+      data: {
+        observationId,
+        action: "DELETED",
+        performedBy: adminId
+      }
+    });
+
+    return updated;
+  }
+
+  async restoreObservation(observationId, adminId) {
+    const obs = await prisma.observation.findUnique({ where: { id: observationId }});
+    if (!obs || !obs.deletedAt) throw new Error("Observation non supprimée ou inexistante");
+
+    const restored = await prisma.observation.update({
+      where: { id: observationId },
+      data: { deletedAt: null }
+    });
+
+    await prisma.observationHistory.create({
+      data: {
+        observationId,
+        action: "RESTORED",
+        performedBy: adminId
+      }
+    });
+
+    return restored;
+  }
+
+  async getUserHistory(userId) {
+    return await prisma.observationHistory.findMany({
+      where: { performedBy: userId },
+      orderBy: { performedAt: "desc" },
+      include: { observation: true }
+    });
+  }
+
+  async getSpeciesHistory(speciesId) {
+    return await prisma.observationHistory.findMany({
+      where: { observation: { speciesId } },
+      orderBy: { performedAt: "desc" },
+      include: { observation: true }
+    });
   }
 }
 

@@ -1,6 +1,16 @@
 const observationService = require('../services/observationService');
 
 class ObservationController {
+
+  async getAllObservations(req, res) {
+  try {
+    const observations = await observationService.getAllObservations();
+    res.json(observations);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
   async createObservation(req, res) {
     try {
       const { speciesId, description, dangerLevel } = req.body;
@@ -68,6 +78,42 @@ class ObservationController {
       res.json({ success: true, observation });
     } catch (error) {
       res.status(400).json({ error: error.message });
+    }
+  }
+
+   async softDeleteObservation(req, res) {
+    try {
+      const obs = await observationService.softDeleteObservation(req.params.id, req.user.id);
+      res.json(obs);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  async restoreObservation(req, res) {
+    try {
+      const obs = await observationService.restoreObservation(req.params.id, req.user.id);
+      res.json(obs);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  async getUserHistory(req, res) {
+    try {
+      const history = await observationService.getUserHistory(req.params.id);
+      res.json(history);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  async getSpeciesHistory(req, res) {
+    try {
+      const history = await observationService.getSpeciesHistory(req.params.id);
+      res.json(history);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
     }
   }
 }

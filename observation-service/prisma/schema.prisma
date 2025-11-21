@@ -29,9 +29,10 @@ model Observation {
   status      Status    @default(PENDING)           
   validatedBy Int?                                   
   validatedAt DateTime?                              
-  createdAt   DateTime  @default(now())              
+  createdAt   DateTime  @default(now())  
+  deletedAt   DateTime?
+  histories   ObservationHistory[]            
 }
-
 
 // Statuts 
 
@@ -39,4 +40,20 @@ enum Status {
   PENDING     // En attente
   VALIDATED   // Accepté
   REJECTED    // Refusé
+}
+
+model ObservationHistory {
+  id            Int       @id @default(autoincrement())
+  observationId Int
+  action        Action
+  performedBy   Int
+  performedAt   DateTime  @default(now())
+  note          String?
+}
+
+enum Action {
+  VALIDATED
+  REJECTED
+  DELETED
+  RESTORED
 }
